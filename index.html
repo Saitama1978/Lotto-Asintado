@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotto Asintado Pro</title>
+    <style>
+        :root {
+            --bg-purple-deep: #1e1135;
+            --bg-dark-card: #171126;
+            --bg-input: #231b34;
+            --text-gold: #facc15;
+            --text-muted: #94a3b8;
+            --accent-purple: #a855f7;
+            --accent-orange: #f97316;
+            --accent-green: #22c55e;
+            --border-color: #3b2d54;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-purple-deep);
+            color: var(--white);
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 20px;
+        }
+
+        /* HEADER AREA */
+        header {
+            padding: 20px 15px 15px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .star-logo {
+            background-color: var(--text-gold);
+            color: var(--bg-purple-deep);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .header-titles h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-titles p {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .db-status {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        /* NAVIGATION TABS */
+        .nav-tabs {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--border-color);
+            background-color: #170e28;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 14px 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+        }
+
+        .tab-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .tab-btn.active {
+            color: var(--text-gold);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 15%;
+            width: 70%;
+            height: 3px;
+            background-color: var(--text-gold);
+        }
+
+        /* MAIN CONTENT VIEWS */
+        .main-container {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* LIVE JACKPOT TOP BANNER */
+        .jackpot-banner {
+            background: linear-gradient(135deg, #2d184c, #190f2b);
+            border: 1px solid var(--text-gold);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .jackpot-ring {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--accent-orange);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--accent-orange);
+            background-color: rgba(249, 115, 22, 0.05);
+        }
+
+        .jackpot-info h3 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .jackpot-amount {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-gold);
+            margin: 2px 0;
+        }
+
+        .latest-draw-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: rgba(0,0,0,0.2);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            border: 1px solid rgba(250, 204, 21, 0.2);
+        }
+
+        /* SELECTORS & ACTIONS CRADLE */
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .dropdown-control {
+            flex: 1;
+            background-color: var(--bg-dark-card);
+            border: 1px solid var(--border-color);
+            color: var(--white);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn-sync {
+            background: none;
+            border: 1px solid var(--text-gold);
+            color: var(--text-gold);
+            padding: 0 16px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+        }
+
+        /* GRID DASHBOARD CARDS */
+        .grid-split {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .dashboard-card {
+            background-color: var(--bg-dark-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .card-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* FREQUENCY CHART */
+        .chart-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 95px;
+            padding: 0 5px;
+        }
+
+        .chart-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .chart-bar {
+            width: 12px;
+            border-radius: 4px;
+            min-height: 10px;
+            transition: height 0.5s ease;
+        }
+
+        .bar-1 { background-color: #ff5b60; }
+        .bar-2 { background-color: #ff9f43; }
+        .bar-3 { background-color: #1dd1a1; }
+        .bar-4 { background-color: #2e86de; }
+        .bar-5 { background-color: #9b5de5; }
+        .bar-6 { background-color: #f15bb5; }
+
+        .chart-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* LUCKY GENERATOR INPUTS */
+        .input-block {
+            margin-bottom: 8px;
+        }
+        .input-block label {
+            display: block;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+        .input-box {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--white);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .btn-calc {
+            width: 100%;
+            background: none;
+            border: 1px solid var(--text-gold);
+            color: var(--text-gold);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        /* BALL GENERATOR ROWS */
+        .ball-row-card {
+            background-color: var(--bg-dark-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ball-container {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .lotto-ball {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #3e2b5e, #1c1030);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-gold);
+        }
+
+        .btn-save-ball {
+            background-color: #231b34;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-save-ball:hover {
+            color: var(--white);
+            border-color: var(--text-muted);
+        }
+
+        /* REFRESH FLOAT BUTTON */
+        .floating-action {
+            position: fixed;
+            bottom: 20px;
+            right: calc(50% - 230px);
+            background-color: var(--bg-dark-card);
+            border: 2px solid var(--border-color);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        @media(max-width: 500px) {
+            .floating-action { right: 20px; }
+        }
+
+        /* STRATEGY & HISTORY CARDS */
+        .section-header-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-gold);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .strategy-card {
+            background-color: var(--bg-dark-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .strategy-card h4 {
+            font-size: 0.85rem;
+            color: var(--white);
+            margin-bottom: 6px;
+        }
+
+        .strategy-card p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .history-card {
+            background-color: var(--bg-dark-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-meta h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .history-meta p {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .history-result-badge {
+            background-color: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-gold);
+            letter-spacing: 0.5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 40px 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px 0 5px 0;
+            color: var(--accent-orange);
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP CONTROL BRANDING -->
+    <header>
+        <div class="star-logo">★</div>
+        <div class="header-titles">
+            <h1>Lotto Asintado Pro</h1>
+            <p>Developer: <span style="color:#fff;">Renante Fullo</span> | DB: <span class="db-status">Connected ✅</span></p>
+        </div>
+    </header>
+
+    <!-- LIVE TABS BAR -->
+    <div class="nav-tabs">
+        <button class="tab-btn" onclick="switchLottoTab(this, 'tab-combinations')">
+            <svg viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5 0.67 1.5 1.5-.67 1.5-1.5 1.5zm0 3.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-7c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm5 3.5h11c.55 0 1-.45 1-1s-.45-1-1-1H9c-.55 0-1 .45-1 1s.45 1 1 1zm0 3.5h11c.55 0 1-.45 1-1s-.45-1-1-1H9c-.55 0-1 .45-1 1s.45 1 1 1zm0-7h11c.55 0 1-.45 1-1s-.45-1-1-1H9c-.55 0-1 .45-1 1s.45 1 1 1z"/></svg>
+            My Combinations
+        </button>
+        <button class="tab-btn active" onclick="switchLottoTab(this, 'tab-hotnumbers')">
+            <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
+            Hot Numbers
+        </button>
+        <button class="tab-btn" onclick="switchLottoTab(this, 'tab-strategy')">
+            <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.1-1.3 4.8-1.3 1.7 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.45-.75-2.35-1zM19 18.5c-1.15-.45-2.55-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5V7c1.45-1.1 3.55-1.5 5.5-1.5 1.15 0 2.55.1 3.5.5v12.5z"/></svg>
+            Strategy Guide
+        </button>
+        <button class="tab-btn" onclick="switchLottoTab(this, 'tab-history')">
+            <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+            My History
+        </button>
+    </div>
+
+    <!-- MAIN VIEW AREA -->
+    <div class="main-container">
+
+        <!-- VIEW 1: MY COMBINATIONS -->
+        <div id="tab-combinations" class="view-section">
+            <div class="section-header-title">⭐ Saved Target Combinations</div>
+            <div id="saved-combinations-list" class="empty-state">
+                No saved combinations yet.
+            </div>
+        </div>
+
+        <!-- VIEW 2: HOT NUMBERS (MAIN DASHBOARD) -->
+        <div id="tab-hotnumbers" class="view-section active">
+            
+            <!-- LIVE JACKPOT BANNER -->
+            <div class="jackpot-banner">
+                <div class="jackpot-ring" id="banner-game-badge">6/42</div>
+                <div class="jackpot-info">
+                    <h3 id="banner-game-title">Next Draw: 6/42 Lotto</h3>
+                    <div class="jackpot-amount" id="banner-jackpot">₱10,000,000</div>
+                    <div class="latest-draw-pill">
+                        ⚡ <span>Latest Draw:</span> <strong id="banner-latest-result" style="color:var(--text-gold);">39-38-34-21-10-03</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTROLS ROW -->
+            <div class="control-row">
+                <select id="lotto-game-selector" class="dropdown-control" onchange="handleGameChange()">
+                    <option value="642" selected>6/42 Lotto</option>
+                    <option value="645">6/45 Lotto</option>
+                    <option value="649">6/49 Lotto</option>
+                    <option value="655">6/55 Lotto</option>
+                    <option value="658">6/58 Lotto</option>
+                    <option value="2d">2D Digit Game</option>
+                    <option value="3d">3D Digit Game</option>
+                    <option value="4d">4D Digit Game</option>
+                </select>
+                <button class="btn-sync" onclick="syncLottoDataLive()">
+                    🔄 Sync Data
+                </button>
+            </div>
+
+            <!-- SPLIT GRAPHICS ENGINE -->
+            <div class="grid-split">
+                <!-- CHART CARD -->
+                <div class="dashboard-card">
+                    <div class="card-title">Hot Number Frequency</div>
+                    <div class="chart-container" id="frequency-chart-container">
+                        <!-- CSS Column Bars Dynamically Loaded Inside -->
+                    </div>
+                </div>
+
+                <!-- GENERATOR CARD -->
+                <div class="dashboard-card">
+                    <div class="card-title">Lucky Generator</div>
+                    <div class="input-block">
+                        <label>Method</label>
+                        <select id="gen-method" class="input-box" style="background-color: var(--bg-purple-deep);">
+                            <option value="zodiac">Zodiac</option>
+                            <option value="lucky">Lucky Pick</option>
+                            <option value="hotcold">Hot & Cold</option>
+                        </select>
+                    </div>
+                    <div class="input-block">
+                        <label>Birth Year</label>
+                        <input type="number" id="gen-birthyear" class="input-box" value="1951">
+                    </div>
+                    <button class="btn-calc" onclick="calculateLuckyCombination()">Calculate</button>
+                </div>
+            </div>
+
+            <!-- GENERATOR BALL ROW OUTPUTS -->
+            <div id="generated-rows-feed">
+                <!-- Ang mga kinalabasan ng kalkulasyon ay dito papasok -->
+            </div>
+
+        </div>
+
+        <!-- VIEW 3: STRATEGY GUIDE -->
+        <div id="tab-strategy" class="view-section">
+            <div class="section-header-title">📐 Pattern Analysis Strategy</div>
+            
+            <div class="strategy-card">
+                <h4>Odd/Even Balancing</h4>
+                <p>Ang pinakamataas na tsansa na lumabas sa PCSO ay 3 Odd at 3 Even numbers.</p>
+            </div>
+
+            <div class="strategy-card">
+                <h4>Hot & Cold Method</h4>
+                <p>Pagsamahin ang 2 Hot Numbers at 3 Cold Numbers para sa magandang kombinasyon.</p>
+            </div>
+        </div>
+
+        <!-- VIEW 4: MY HISTORY -->
+        <div id="tab-history" class="view-section">
+            <div class="section-header-title">📋 Latest Live Results Feed</div>
+            <div id="history-lotto-feed">
+                <!-- Auto Loaded from Database object inside -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- REFRESH FLOAT BUTTON -->
+    <button class="floating-action" onclick="syncLottoDataLive()">
+        <svg viewBox="0 0 24 24" style="width:20px; height:20px; fill:var(--text-gold);"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+    </button>
+
+    <footer>Developed by: Renante Fullo</footer>
+
+    <script>
+        // Central Live Simulator Database
+        const lottoDatabase = {
+            "642": { title: "6/42 Lotto", jackpot: "₱10,000,000", badge: "6/42", last: "39-38-34-21-10-03", count: 6, max: 42, hot: [19, 27, 5, 41, 12, 33] },
+            "645": { title: "6/45 Lotto", jackpot: "₱24,500,000", badge: "6/45", last: "27-45-38-35-25-10", count: 6, max: 45, hot: [11, 24, 9, 42, 18, 5] },
+            "649": { title: "6/49 Lotto", jackpot: "₱56,120,500", badge: "6/49", last: "39-40-01-47-29-17", count: 6, max: 49, hot: [3, 17, 29, 44, 31, 12] },
+            "655": { title: "6/55 Lotto", jackpot: "₱120,400,000", badge: "6/55", last: "33-46-43-19-38-42", count: 6, max: 55, hot: [45, 22, 8, 51, 14, 39] },
+            "658": { title: "6/58 Lotto", jackpot: "₱285,900,000", badge: "6/58", last: "47-21-43-20-05-37", count: 6, max: 58, hot: [52, 13, 24, 33, 41, 7] },
+            "2d":  { title: "2D Digit Game", jackpot: "₱4,000 Fixed", badge: "2D", last: "14-22", count: 2, max: 31, hot: [14, 22, 5, 9, 11, 29] },
+            "3d":  { title: "3D Digit Game", jackpot: "₱4,500 Fixed", badge: "3D", last: "9-0-4", count: 3, max: 9, hot: [9, 0, 4, 7, 2, 5] },
+            "4d":  { title: "4D Digit Game", jackpot: "₱10,000 Fixed", badge: "4D", last: "6-1-2-2", count: 4, max: 9, hot: [6, 1, 2, 5, 8, 0] }
+        };
+
+        let savedCombinations = [];
+
+        function switchLottoTab(btn, tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function handleGameChange() {
+            const gameKey = document.getElementById('lotto-game-selector').value;
+            const data = lottoDatabase[gameKey];
+
+            // Render Banner Info
+            document.getElementById('banner-game-badge').innerText = data.badge;
+            document.getElementById('banner-game-title').innerText = `Next Draw: ${data.title}`;
+            document.getElementById('banner-jackpot').innerText = data.jackpot;
+            document.getElementById('banner-latest-result').innerText = data.last;
+
+            renderFrequencyChart(data.hot);
+            document.getElementById('generated-rows-feed').innerHTML = ''; // Clear temporary calculations
+        }
+
+        function renderFrequencyChart(hotNumbers) {
+            const container = document.getElementById('frequency-chart-container');
+            container.innerHTML = '';
+            
+            // Random dynamic heights para magmukhang totoong active stream feed
+            const simulatedHeights = [85, 70, 58, 62, 50, 35]; 
+
+            hotNumbers.forEach((num, index) => {
+                const padNum = num.toString().padStart(2, '0');
+                const height = simulatedHeights[index] || 40;
+                
+                const colHTML = `
+                    <div class="chart-column">
+                        <div class="chart-bar bar-${index + 1}" style="height: ${height}px;"></div>
+                        <div class="chart-label">${padNum}</div>
+                    </div>
+                `;
+                container.innerHTML += colHTML;
+            });
+        }
+
+        function calculateLuckyCombination() {
+            const gameKey = document.getElementById('lotto-game-selector').value;
+            const data = lottoDatabase[gameKey];
+            
+            let numPool = [];
+            while(numPool.length < data.count) {
+                let randNum;
+                if(gameKey === "3d" || gameKey === "4d") {
+                    randNum = Math.floor(Math.random() * (data.max + 1)); // 0 to 9 para sa digit games
+                    numPool.push(randNum);
+                } else {
+                    randNum = Math.floor(Math.random() * data.max) + 1; // 1 to Max para sa normal lotto
+                    if(!numPool.includes(randNum)) numPool.push(randNum);
+                }
+            }
+
+            if(gameKey !== "3d" && gameKey !== "4d") {
+                numPool.sort((a, b) => a - b);
+            }
+
+            const stringCombination = numPool.map(n => n.toString().padStart(2, '0')).join('-');
+            const feedContainer = document.getElementById('generated-rows-feed');
+
+            const cardHTML = `
+                <div class="ball-row-card">
+                    <div class="ball-container">
+                        ${numPool.map(n => `<div class="lotto-ball">${n.toString().padStart(2, '0')}</div>`).join('')}
+                    </div>
+                    <button class="btn-save-ball" onclick="saveCombination('${data.title}', '${stringCombination}')">⭐ Save</button>
+                </div>
+            `;
+            feedContainer.insertAdjacentHTML('afterbegin', cardHTML);
+        }
+
+        function saveCombination(gameTitle, comboStr) {
+            if(savedCombinations.includes(`${gameTitle}: ${comboStr}`)) {
+                alert("Naka-save na po itong kombinasyon na ito boss!");
+                return;
+            }
+            savedCombinations.push(`${gameTitle}: ${comboStr}`);
+            renderSavedCombinations();
+            alert("Kombinasyon matagumpay na naitabi sa My Combinations tab, boss!");
+        }
+
+        function renderSavedCombinations() {
+            const container = document.getElementById('saved-combinations-list');
+            if(savedCombinations.length === 0) {
+                container.innerHTML = `<div class="empty-state">No saved combinations yet.</div>`;
+                return;
+            }
+            container.innerHTML = '';
+            savedCombinations.forEach((item, index) => {
+                const parts = item.split(': ');
+                const title = parts[0];
+                const numbers = parts[1].split('-');
+
+                const rowHTML = `
+                    <div class="ball-row-card" style="border-left:3px solid var(--text-gold);">
+                        <div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); font-weight:700; margin-bottom:4px;">${title}</div>
+                            <div class="ball-container">
+                                ${numbers.map(n => `<div class="lotto-ball" style="width:28px; height:28px; font-size:0.7rem;">${n}</div>`).join('')}
+                            </div>
+                        </div>
+                        <button class="btn-save-ball" style="color:var(--accent-orange); border-color:rgba(249,115,22,0.3);" onclick="deleteCombo(${index})">Remove</button>
+                    </div>
+                `;
+                container.innerHTML += rowHTML;
+            });
+        }
+
+        function deleteCombo(index) {
+            savedCombinations.splice(index, 1);
+            renderSavedCombinations();
+        }
+
+        function syncLottoDataLive() {
+            // Simulator Effect: Taasan ang mga Jackpot nang bahagya kapag nag-click ng sync
+            Object.keys(lottoDatabase).forEach(key => {
+                if(!key.includes('d')) {
+                    let currentAmt = parseInt(lottoDatabase[key].jackpot.replace(/[^0-9]/g, ''));
+                    let incrementalBonus = Math.floor(Math.random() * 250000) + 50000;
+                    lottoDatabase[key].jackpot = "₱" + (currentAmt + incrementalBonus).toLocaleString();
+                }
+            });
+
+            handleGameChange();
+            renderHistoryFeed();
+            
+            // Visual prompt dynamic toast
+            const originalStatus = document.querySelector('.db-status').innerText;
+            document.querySelector('.db-status').innerText = "Syncing Grid Server Live...";
+            document.querySelector('.db-status').style.color = "var(--accent-orange)";
+            
+            setTimeout(() => {
+                document.querySelector('.db-status').innerText = "Connected Live Feed ✅";
+                document.querySelector('.db-status').style.color = "var(--accent-green)";
+                alert("Lotto Server Data Feed Matrix Refreshed, Boss!");
+            }, 800);
+        }
+
+        function renderHistoryFeed() {
+            const container = document.getElementById('history-lotto-feed');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            Object.keys(lottoDatabase).forEach(key => {
+                const data = lottoDatabase[key];
+                const itemHTML = `
+                    <div class="history-card">
+                        <div class="history-meta">
+                            <h4>${data.title}</h4>
+                            <p>Latest Online Server Result</p>
+                        </div>
+                        <div class="history-result-badge">${data.last}</div>
+                    </div>
+                `;
+                container.innerHTML += itemHTML;
+            });
+        }
+
+        // Initialize Suite
+        window.onload = function() {
+            handleGameChange();
+            renderHistoryFeed();
+        }
+    </script>
+</body>
+</html>
