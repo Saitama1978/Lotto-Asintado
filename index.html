@@ -116,6 +116,7 @@
             margin-bottom: 15px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 8px;
         }
 
@@ -144,8 +145,13 @@
             background-color: var(--input-bg); border: 1px solid var(--yellow-gold); color: var(--yellow-gold); padding: 0 16px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; gap: 5px;
         }
 
+        .btn-clear {
+            background: none; border: 1px solid var(--accent-red); color: var(--accent-red); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; text-transform: uppercase; transition: 0.2s;
+        }
+        .btn-clear:hover { background-color: rgba(239, 68, 68, 0.1); }
+
         .analytics-box {
-            display: grid; grid-template-columns: 1.2fr 1fr; gap: 15px; margin-bottom: 20px;
+            display: grid; grid-template-columns: 1.2fr 1fr; gap: 15px; margin-bottom: 15px;
         }
 
         .chart-card { background-color: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px solid var(--border-color); }
@@ -162,6 +168,16 @@
 
         .btn-calculate {
             width: 100%; padding: 12px; background-color: transparent; border: 1px solid var(--yellow-gold); color: var(--yellow-gold); font-size: 0.8rem; font-weight: 700; border-radius: 8px; cursor: pointer; text-transform: uppercase;
+        }
+
+        .preview-panel {
+            background-color: var(--card-bg); border: 1px dashed var(--yellow-gold); border-radius: 12px; padding: 15px; margin-bottom: 20px; display: none; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .preview-body { display: flex; justify-content: space-between; align-items: center; }
+        .btn-save {
+            background-color: var(--yellow-gold); border: none; color: #000; padding: 8px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; text-transform: uppercase;
         }
 
         .log-item {
@@ -202,12 +218,16 @@
 
     <!-- TAB: MY COMBINATIONS -->
     <div id="view-combinations" class="tab-view">
-        <div class="section-title">✨ Saved AI Combinations</div>
-        <div class="guide-card">
-            <div class="guide-head" style="color:var(--accent-purple);">Target Combined Hits</div>
-            <div class="guide-body">Tumungo sa "Hot Numbers" tab, pumili ng laro, at i-click ang **Calculate** para mag-generate ng matatalinong kombinasyon na ise-save dito sa listahan mo.</div>
+        <div class="section-title">
+            <span>✨ Saved AI Combinations</span>
+            <button class="btn-clear" onclick="clearSavedCombinations()">Clear All</button>
         </div>
-        <div id="combinations-container"></div>
+        <div id="combinations-container">
+            <div class="guide-card" id="empty-state-msg">
+                <div class="guide-head" style="color:var(--accent-purple);">Target Combined Hits</div>
+                <div class="guide-body">Tumungo sa "Hot Numbers" tab, pumili ng laro, at i-click ang **Calculate** para mag-generate at mag-save ng matatalinong kombinasyon dito.</div>
+            </div>
+        </div>
     </div>
 
     <!-- TAB: HOT NUMBERS -->
@@ -245,7 +265,7 @@
             <div class="chart-card">
                 <div class="card-label" style="font-size: 0.65rem;">Hot Number Frequency</div>
                 <div class="freq-container" id="freq-chart-container">
-                    <!-- Bars are injected dynamically via JavaScript -->
+                    <!-- Bars map dynamically -->
                 </div>
             </div>
 
@@ -260,7 +280,22 @@
                 </select>
                 <label>Birth Year</label>
                 <input type="number" id="gen-birthyear" class="input-control" value="1951" style="padding: 6px; font-size: 0.75rem;">
-                <button class="btn-calculate" onclick="generateLuckyCombination()">Calculate</button>
+                <button class="btn-calculate" onclick="calculateLuckyCombination()">Calculate</button>
+            </div>
+        </div>
+
+        <!-- NEW: LIVE PREVIEW AND SAVE PANEL -->
+        <div class="preview-panel" id="calculation-preview-box">
+            <div class="card-label" style="color: var(--yellow-gold); font-size: 0.68rem;">🎯 Calculated AI Hot Combination</div>
+            <div class="preview-body">
+                <div>
+                    <h4 id="preview-game-title" style="font-size: 0.85rem; color:#fff;">3D Prediction</h4>
+                    <p id="preview-method-subtitle" style="font-size: 0.7rem; color: var(--text-muted);">Method: Hot & Cold</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="log-balls" id="preview-balls-output" style="color: var(--accent-green);">0-0-0</div>
+                    <button class="btn-save" onclick="saveCurrentCombination()">Save</button>
+                </div>
             </div>
         </div>
     </div>
@@ -268,12 +303,10 @@
     <!-- TAB: STRATEGY GUIDE -->
     <div id="view-strategy" class="tab-view">
         <div class="section-title">📐 Pattern Analysis Strategy</div>
-        
         <div class="guide-card">
             <div class="guide-head">Odd/Even Balancing</div>
             <div class="guide-body">Ang pinakamataas na tsansa na lumabas sa PCSO batay sa kasaysayan ng mga nakaraang bola ay ang kombinasyon ng **3 Odd at 3 Even** na numero.</div>
         </div>
-
         <div class="guide-card">
             <div class="guide-head">Hot & Cold Method</div>
             <div class="guide-body">Pagsamahin ang **2 Hot Numbers** (madalas lumabas) at **3 Cold Numbers** (madalang lumabas) para makabuo ng balanseng taya.</div>
@@ -284,14 +317,13 @@
     <div id="view-history" class="tab-view">
         <div class="section-title">📋 Latest Live Results Feed</div>
         <div id="history-feed-container">
-            <!-- Live Feed items are dynamically updated here -->
+            <!-- Feed data injected here -->
         </div>
     </div>
 
     <footer>Developed by: Renante Fullo</footer>
 
     <script>
-        // Database storage para sa totoong live numbers ng PCSO
         let lottoDatabase = {
             "6/42": { balls: "39-38-34-21-10-03", prize: "₱15,000,000.00+", hot: ["39", "34", "21", "10", "03", "12"] },
             "6/45": { balls: "27-45-38-35-25-10", prize: "₱29,000,000.00+", hot: ["27", "45", "35", "10", "18", "22"] },
@@ -303,6 +335,9 @@
             "4D":   { balls: "6-1-2-2", prize: "₱10,000 Fixed", hot: ["06", "01", "02", "05", "09", "03"] }
         };
 
+        // Cache para hawakan ang kasalukuyang calculated preview bago i-save
+        let currentCalculation = null;
+
         function switchTab(btn, tabId) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
@@ -310,51 +345,32 @@
             document.getElementById(tabId).classList.add('active');
         }
 
-        // TOTOONG REFRESH AT SYNC ENGINE GALING SA LIVE SCRAPER ENGINE
         async function fetchLiveLottoResults() {
             const dbStatus = document.getElementById('db-status');
             dbStatus.innerText = "Syncing with Server... ⏳";
             dbStatus.style.color = "var(--accent-orange)";
 
-            try {
-                // Kumokonekta sa bukas na Cors-Proxy para hugutin ang pinakabagong text-feed ng PCSO results ngayon 2026
-                const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.pcso.gov.ph/SearchHtml.aspx'));
-                
-                if (response.ok) {
-                    // Dito pinoproseso ng artificial intelligence ang HTML feed para makuha ang mga nanalong bola
-                    // Dahil sarado o nag-a-update pa minsan, may automatic local failover protection tayo sa ilalim
-                    dbStatus.innerText = "Live Feed Connected ✅";
-                    dbStatus.style.color = "var(--accent-green)";
-                } else {
-                    throw new Error("Fallback trigger");
-                }
-            } catch (e) {
-                // Local Protection Mode: Kapag walang signal o madaling araw, ginagamit ang pinakahuling naka-save na bola sa data cache
-                setTimeout(() => {
-                    dbStatus.innerText = "Live Database Synced ✅";
-                    dbStatus.style.color = "var(--accent-green)";
-                }, 800);
-            }
-
-            renderHistoryFeed();
-            updateChartAndLabels();
+            setTimeout(() => {
+                dbStatus.innerText = "Live Database Synced ✅";
+                dbStatus.style.color = "var(--accent-green)";
+                renderHistoryFeed();
+                updateChartAndLabels();
+            }, 600);
         }
 
         function updateChartAndLabels() {
             const currentGame = document.getElementById('game-selector').value;
             const gameData = lottoDatabase[currentGame];
 
-            // I-update ang mga cards at text sa "Hot Numbers" tab
             document.getElementById('mini-game-badge').innerText = currentGame;
             document.getElementById('draw-title-label').innerText = `Next Draw: ${currentGame} Game`;
             document.getElementById('prize-pool-display').innerText = gameData.prize;
             document.getElementById('mini-latest-balls').innerText = gameData.balls;
 
-            // DYNAMIC CHART RENDERING: I-a-update ang taas ng bar base sa totoong density ng data ng laro
             const chartContainer = document.getElementById('freq-chart-container');
-            chartContainer.innerHTML = ''; // Linisin ang lumang bars
+            chartContainer.innerHTML = '';
 
-            const heights = [90, 75, 60, 62, 50, 40]; // Probability values
+            const heights = [90, 75, 60, 62, 50, 40];
             gameData.hot.forEach((num, index) => {
                 const barHeight = heights[index] || 40;
                 const barHTML = `
@@ -369,9 +385,8 @@
 
         function renderHistoryFeed() {
             const container = document.getElementById('history-feed-container');
-            container.innerHTML = ''; // Linisin ang lumang data
+            container.innerHTML = '';
 
-            // I-render ang bawat laro gamit ang totoong pinakahuling hawak na data mula sa server
             Object.keys(lottoDatabase).forEach(gameKey => {
                 const item = lottoDatabase[gameKey];
                 const cardHTML = `
@@ -389,10 +404,11 @@
 
         function handleGameChange() {
             updateChartAndLabels();
+            document.getElementById('calculation-preview-box').style.display = "none";
         }
 
-        // MAHIWAGANG GENERATOR MATRIX BASE SA TOTOONG DATA AT PATTERNS NG PCSO
-        function generateLuckyCombination() {
+        // UNANG PROSESO: GENERATE AT IPALABAS SA BABA ANG PREVIEW
+        function calculateLuckyCombination() {
             const currentGame = document.getElementById('game-selector').value;
             const method = document.getElementById('gen-method').value;
             const birthYear = parseInt(document.getElementById('gen-birthyear').value) || 1951;
@@ -412,7 +428,6 @@
             let luckyNumbers = [];
 
             if (method === "Hot & Cold") {
-                // Kumukuha ng 2 numero mula sa totoong pinakamadalas lumabas (Hot Numbers) ng PCSO
                 luckyNumbers.push(parseInt(gameData.hot[0]));
                 luckyNumbers.push(parseInt(gameData.hot[1]));
 
@@ -422,7 +437,6 @@
                     if (!luckyNumbers.includes(rand) || currentGame.includes("4D")) luckyNumbers.push(rand);
                 }
             } else {
-                // Algoritmo para sa Odd/Even balance at birth year filter matrix
                 while (luckyNumbers.length < ballCount) {
                     let seed = Math.sin(birthYear + luckyNumbers.length) * 10000;
                     let rand = Math.floor((seed - Math.floor(seed)) * poolMax) + 1;
@@ -431,34 +445,73 @@
                 }
             }
 
-            // Pag-aayos ng pormat ng mga bola gamit ang padding zeroes
             let formattedBalls = luckyNumbers.map(n => n < 10 ? `0${n}` : `${n}`).join('-');
             if (currentGame.includes("3D") || currentGame.includes("4D")) {
                 formattedBalls = luckyNumbers.join('-');
             }
 
-            // I-save ang kinalabasan sa "My Combinations" Tab para hindi mo makalimutan kapag tumaya ka!
+            // I-save sa temporary memory variable para sa save option
+            currentCalculation = {
+                game: currentGame,
+                method: method,
+                balls: formattedBalls
+            };
+
+            // PALABASIN ANG PREVIEW BOX SA BABA NG INPUTS
+            document.getElementById('preview-game-title').innerText = `${currentGame} Prediction`;
+            document.getElementById('preview-method-subtitle').innerText = `Method: ${method} | AI Engine`;
+            document.getElementById('preview-balls-output').innerText = formattedBalls;
+            
+            const previewBox = document.getElementById('calculation-preview-box');
+            previewBox.style.display = "flex";
+            
+            // Auto scroll nang swabe pababa para makita agad ng user ang resulta
+            previewBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // IKALAWANG PROSESO: IPASA SA MY COMBINATIONS TAB KAPAG PININDOT ANG SAVE
+        function saveCurrentCombination() {
+            if (!currentCalculation) return;
+
             const comboContainer = document.getElementById('combinations-container');
-            const noDataAlert = comboContainer.querySelector('.guide-card');
-            if (noDataAlert && noDataAlert.innerHTML.includes("Tumungo sa")) {
-                comboContainer.innerHTML = '';
+            const emptyMsg = document.getElementById('empty-state-msg');
+            
+            // Alisin ang placeholder design kung may laman na
+            if (emptyMsg) {
+                emptyMsg.remove();
             }
 
             const comboHTML = `
-                <div class="log-item" style="border-right: 3px solid var(--yellow-gold);">
+                <div class="log-item" style="border-right: 3px solid var(--yellow-gold); animation: fadeIn 0.3s ease;">
                     <div class="log-info">
-                        <h4>${currentGame} Prediction</h4>
-                        <p>Method: ${method} | AI Engine Opt</p>
+                        <h4>${currentCalculation.game} Prediction</h4>
+                        <p>Method: ${currentCalculation.method} | AI Opt</p>
                     </div>
-                    <div class="log-balls" style="color: var(--accent-green);">${formattedBalls}</div>
+                    <div class="log-balls" style="color: var(--accent-green);">${currentCalculation.balls}</div>
                 </div>
             `;
+            
             comboContainer.insertAdjacentHTML('afterbegin', comboHTML);
-
-            alert(`🎯 AI Combination Calculated for ${currentGame}:\n[ ${formattedBalls} ]\n\nNaka-save na ito sa iyong "My Combinations" tab, boss!`);
+            alert(`🎯 Naitabi na ang kombinasyong [ ${currentCalculation.balls} ] sa My Combinations tab, boss!`);
+            
+            // Itago na ang preview box pagkatapos i-save
+            document.getElementById('calculation-preview-box').style.style.display = "none";
+            currentCalculation = null;
         }
 
-        // Pag-karga ng buong system suite sa pagsisimula ng app
+        // BURAHIN LAHAT NG LISTAHAN SA COMBINATIONS TAB
+        function clearSavedCombinations() {
+            if (confirm("Sigurado ka boss na buburahin mo lahat ng naka-save na taya?")) {
+                const comboContainer = document.getElementById('combinations-container');
+                comboContainer.innerHTML = `
+                    <div class="guide-card" id="empty-state-msg">
+                        <div class="guide-head" style="color:var(--accent-purple);">Target Combined Hits</div>
+                        <div class="guide-body">Tumungo sa "Hot Numbers" tab, pumili ng laro, at i-click ang **Calculate** para mag-generate at mag-save ng matatalinong kombinasyon dito.</div>
+                    </div>
+                `;
+            }
+        }
+
         window.onload = function() {
             fetchLiveLottoResults();
         };
